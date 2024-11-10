@@ -2,8 +2,9 @@ from fastapi import FastAPI, Body, Depends
 
 from app.auth.auth_bearer import JWTBearer
 from app.auth.auth_handler import sign_jwt
-from app.model import PostSchema, UserSchema, UserLoginSchema
+from app.model import PostSchema, UserSchema
 from app.db import create_tables
+from app.hash_pass import check_password
 
 
 posts = [
@@ -19,30 +20,30 @@ users = []
 app = FastAPI()
 
 
-def check_user(data: UserLoginSchema):
+def check_user(data: UserSchema):
     for user in users:
-        if user.email == data.email and user.password == data.password:
+        if user.name == data.name and user.password == data.password:
             return True
     return False
 
 
 # route handlers
-@app.get("/create_all_tables", dependencies=[Depends(JWTBearer())], tags=["create_all_tables"])
+@app.get("/create_all_tables", tags=["create_all_tables"])
 async def create_all_tables() -> dict:
     await create_tables()
     return {"message": "All tables have been created"}
 
 
-@app.post("/user/signup", tags=["user"])
+@app.post("/register", tags=["user"])
 async def create_user(user: UserSchema = Body(...)):
     users.append(user)
-    return sign_jwt(user.email)
+    return {"message": f"{user.name} have been created"}
 
 
-@app.post("/user/login", tags=["user"])
-async def user_login(user: UserLoginSchema = Body(...)):
+@app.post("/login", tags=["user"])
+async def user_login(user: UserSchema = Body(...)):
     if check_user(user):
-        return sign_jwt(user.email)
+        return sign_jwt(user.name)
     return {
         "error": "Wrong login details!"
     }
