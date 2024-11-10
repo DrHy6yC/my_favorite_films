@@ -44,10 +44,15 @@ async def async_is_user_in_table(user_name: str, user_password: str) -> bool:
         query = select(UsersORM).where(UsersORM.name == user_name)
         result_execute = await session_sql.execute(query)
         user = result_execute.scalars().one()
-        print(user.name, user.hash_password)
-        print(user_password)
-        print(check_password(user.hash_password, user_password))
         return check_password(user.hash_password, user_password)
+
+
+async def async_select_user_by_user_name(user_name: str) -> UsersORM:
+    async with session_maker() as session_sql:
+        query = select(UsersORM).where(UsersORM.name == user_name)
+        result_execute = await session_sql.execute(query)
+        user = result_execute.scalars().one()
+        return user
 
 
 # TODO Сделать проверку на то что пользователь уже есть

@@ -1,6 +1,12 @@
 from pydantic import BaseModel, Field, EmailStr
 
 
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+    access_token_expires: str
+
+
 class PostSchema(BaseModel):
     id: int = Field(default=None)
     title: str = Field(...)
@@ -26,3 +32,8 @@ class UserSchema(BaseModel):
                 "password": "VeryHardPass"
             }
         }
+
+
+class CurrentUser(BaseModel):
+    id: int = Field(...)
+    name: str = Field(...)

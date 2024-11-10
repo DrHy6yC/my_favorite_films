@@ -1,10 +1,9 @@
 from fastapi import FastAPI, Body, Depends
 
 from app.auth.auth_bearer import JWTBearer
-from app.auth.auth_handler import sign_jwt
-from app.model import PostSchema, UserSchema
-from app.db import create_tables, async_insert_user, async_is_user_in_table
-
+from app.auth.auth_handler import sign_jwt, decode_jwt
+from app.model import PostSchema, UserSchema, CurrentUser
+from app.db import create_tables, async_insert_user, async_is_user_in_table, async_select_user_by_user_name, UsersORM
 
 posts = [
     {
@@ -37,6 +36,14 @@ async def user_login(user: UserSchema = Body(...)):
     return {
         "error": "Wrong login details!"
     }
+
+
+@app.get("/profile", tags=["user"], dependencies=[Depends(JWTBearer())])
+async def get_current_user(token=Depends(JWTBearer())):
+    current_user_name: str = decode_jwt(token)['user_name']
+    current_user_db = await async_select_user_by_user_name(current_user_name)
+    # TODO Убрать пароль из отображения
+    return current_user_db
 
 
 @app.get("/posts", tags=["posts"])
