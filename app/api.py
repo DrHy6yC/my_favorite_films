@@ -28,13 +28,24 @@ def check_user(data: UserLoginSchema):
 
 # route handlers
 @app.get("/create_all_tables", dependencies=[Depends(JWTBearer())], tags=["create_all_tables"])
-async def create_all_tables() -> None:
+async def create_all_tables() -> dict:
     await create_tables()
+    return {"message": "All tables have been created"}
 
 
-@app.get("/", tags=["root"])
-async def read_root() -> dict:
-    return {"message": "Welcome to your blog!"}
+@app.post("/user/signup", tags=["user"])
+async def create_user(user: UserSchema = Body(...)):
+    users.append(user)
+    return sign_jwt(user.email)
+
+
+@app.post("/user/login", tags=["user"])
+async def user_login(user: UserLoginSchema = Body(...)):
+    if check_user(user):
+        return sign_jwt(user.email)
+    return {
+        "error": "Wrong login details!"
+    }
 
 
 @app.get("/posts", tags=["posts"])
@@ -62,19 +73,4 @@ async def add_post(post: PostSchema) -> dict:
     posts.append(post.dict())
     return {
         "data": "post added."
-    }
-
-
-@app.post("/user/signup", tags=["user"])
-async def create_user(user: UserSchema = Body(...)):
-    users.append(user)
-    return sign_jwt(user.email)
-
-
-@app.post("/user/login", tags=["user"])
-async def user_login(user: UserLoginSchema = Body(...)):
-    if check_user(user):
-        return sign_jwt(user.email)
-    return {
-        "error": "Wrong login details!"
     }
