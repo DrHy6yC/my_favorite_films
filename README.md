@@ -5,5 +5,7 @@ Example for RecPlace
 2) venv\Scripts\activate
 3) python.exe -m pip install --upgrade pip
 4) pip install -r requirements.txt
-5) docker-compose up -d
-6) python main.py 
+5) create .env
+6) docker-compose up -d
+7) python main.py 
+8) При первом запуске создать таблицы методом  create_all_tables
