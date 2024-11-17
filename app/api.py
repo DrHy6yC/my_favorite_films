@@ -77,3 +77,13 @@ async def add_film_to_favorites(kinopoisk_id: int, token=Depends(JWTBearer())) -
         "message": f"Film with id = {kinopoisk_id} is added  to {user.name}'s favorites",
         "error": "0"
     }
+
+
+@app.delete("/movies/favorites/{kinopoisk_id}", tags=["films"], dependencies=[Depends(JWTBearer())])
+async def delete_film_to_favorites(kinopoisk_id: int, token=Depends(JWTBearer())) -> MessageError:
+    user: CurrentUser = await get_current_user(token)
+
+    return {
+        "message": f"Film with id = {kinopoisk_id} is added  to {user.name}'s favorites",
+        "error": "0"
+    }

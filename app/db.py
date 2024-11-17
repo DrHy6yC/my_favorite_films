@@ -94,3 +94,14 @@ async def async_insert_favorites(kinopoisk_id: int, user_id: int) -> None:
         favorite_add = FavoriteORM(id_kinopoisk=kinopoisk_id, id_user=user_id)
         session_sql.add(favorite_add)
         await session_sql.commit()
+
+
+# async def async_delete_favorites(kinopoisk_id: int, user_id: int) -> None:
+#     async with session_maker() as session_sql:
+#          session_sql.delete(
+#              FavoriteORM,
+#             {
+#                 "id_user": user_id,
+#                 "id_kinopoisk": kinopoisk_id
+#             })
+#         await session_sql.commit()
