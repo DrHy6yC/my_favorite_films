@@ -8,4 +8,4 @@ Example for RecPlace
 5) create .env
 6) docker-compose up -d
 7) python main.py 
-8) При первом запуске создать таблицы методом  create_all_tables
+8) При первом запуске создать таблицы методом  create_all_tables (http://localhost:8081/create_all_tables)

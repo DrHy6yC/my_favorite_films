@@ -20,4 +20,4 @@ HEADERS = {
 
 KINOPOISK_URL = 'https://kinopoiskapiunofficial.tech'
 SEARCH_BY_KEYWORD = 'api/v2.1/films/search-by-keyword?keyword'
-GET_FILM_BY_ID = 'api/v2.2/films'
+FILMS = 'api/v2.2/films'

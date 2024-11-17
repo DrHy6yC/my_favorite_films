@@ -3,19 +3,20 @@ import jwt
 from typing import Dict
 
 from app.config import JWT_ALGORITHM
+from app.model import UserToken
 
 
 JWT_SECRET: str = JWT_ALGORITHM
 JWT_ALGORITHM: str = JWT_ALGORITHM
 
 
-def token_response(token: str):
+def token_response(token: str) -> UserToken:
     return {
         "access_token": token
     }
 
 
-def sign_jwt(user_name: str) -> Dict[str, str]:
+def sign_jwt(user_name: str) -> UserToken:
     payload = {
         "user_name": user_name,
         "expires": time.time() + 600
