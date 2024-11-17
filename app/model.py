@@ -1,24 +1,10 @@
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field
 
 
 class Token(BaseModel):
     access_token: str
     token_type: str
     access_token_expires: str
-
-
-class PostSchema(BaseModel):
-    id: int = Field(default=None)
-    title: str = Field(...)
-    content: str = Field(...)
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "title": "Securing FastAPI applications with JWT.",
-                "content": "In this tutorial, you'll learn how to secure your application by enabling authentication using JWT. We'll be using PyJWT to sign, encode and decode JWT tokens...."
-            }
-        }
 
 
 class UserSchema(BaseModel):
@@ -37,3 +23,5 @@ class UserSchema(BaseModel):
 class CurrentUser(BaseModel):
     id: int = Field(...)
     name: str = Field(...)
+
+
