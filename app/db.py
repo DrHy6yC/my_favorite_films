@@ -3,7 +3,7 @@ from typing import Annotated
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import String, select, ForeignKey
+from sqlalchemy import String, select, ForeignKey, delete
 
 from app.config import DB_USER, DB_PASS, DB_HOST, DB_PORT, DB_NAME
 from app.hash_pass import hash_password, check_password
@@ -62,7 +62,7 @@ async def async_is_user_in_table(user_name: str, user_password: str) -> bool:
             return check_password(user.hash_password, user_password)
 
         except:
-            False
+            return False
 
 
 async def async_select_user_by_user_name(user_name: str) -> UserORM:
@@ -82,6 +82,7 @@ async def async_insert_user(user_name: str, user_password: str) -> None:
         await session_sql.commit()
 
 
+#TODO проверка того что уже есть фильм с таким же kinopoisk_id
 async def async_insert_film(film_id: int, film_name: str) -> None:
     async with session_maker() as session_sql:
         film_add = FilmORM(kinopoisk_id=film_id, name=film_name)
@@ -96,12 +97,13 @@ async def async_insert_favorites(kinopoisk_id: int, user_id: int) -> None:
         await session_sql.commit()
 
 
-# async def async_delete_favorites(kinopoisk_id: int, user_id: int) -> None:
-#     async with session_maker() as session_sql:
-#          session_sql.delete(
-#              FavoriteORM,
-#             {
-#                 "id_user": user_id,
-#                 "id_kinopoisk": kinopoisk_id
-#             })
-#         await session_sql.commit()
+async def async_delete_favorites(kinopoisk_id: int, user_id: int) -> None:
+    async with session_maker() as session_sql:
+        async with session_sql.begin():
+            result = await session_sql.execute(
+                select(FavoriteORM).
+                where(FavoriteORM.id_kinopoisk == kinopoisk_id, FavoriteORM.id_user == user_id)
+            )
+            favorite = result.scalars().first()
+            await session_sql.delete(favorite)
+            await session_sql.commit()

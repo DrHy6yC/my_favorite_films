@@ -4,14 +4,15 @@ from fastapi import FastAPI, Depends
 
 from app.auth.auth_bearer import JWTBearer
 from app.auth.auth_handler import sign_jwt, decode_jwt
-from app.db import async_insert_film, async_insert_favorites, create_tables, async_insert_user, async_is_user_in_table, async_select_user_by_user_name
+from app.db import async_insert_film, async_insert_favorites, create_tables, async_insert_user,\
+    async_is_user_in_table, async_select_user_by_user_name, async_delete_favorites
 from app.config import HEADERS, KINOPOISK_URL, SEARCH_BY_KEYWORD, FILMS
 from app.model import UserSchema, CurrentUser, UserToken, Film, FilmSearch, MessageError
-
 
 app = FastAPI()
 
 
+#TODO добавить статус коды, обработка ошибок
 @app.get("/create_all_tables", tags=["create_all_tables"])
 async def create_all_tables() -> dict:
     await create_tables()
@@ -33,9 +34,10 @@ async def user_login(user: UserSchema) -> UserToken:
     if await async_is_user_in_table(user.name, user.password):
         token = sign_jwt(user.name)
     else:
-        token = {
-                "access_token": "Wrong login details!"
-            }
+        # TODO сделать ошибку авторизации со статус кодом
+        token = UserToken(
+            access_token="Wrong login details!"
+        )
     return token
 
 
@@ -47,7 +49,7 @@ async def get_current_user(token=Depends(JWTBearer())) -> CurrentUser:
 
 
 @app.get("/movies/search", tags=["films"], dependencies=[Depends(JWTBearer())])
-async def get_film_on_name(query: str):
+async def get_film_on_name(query: str) -> list[FilmSearch]:
     async with aiohttp.ClientSession(headers=HEADERS) as session:
         async with session.get(f"{KINOPOISK_URL}/{SEARCH_BY_KEYWORD}={query}") as r:
             json_body = await r.json()
@@ -63,27 +65,28 @@ async def get_film_on_id(kinopoisk_id: int) -> Film:
     return json_body
 
 
-#TODO Сделать проверку если фильм уже есть в избранном
+# TODO Сделать проверку если фильм уже есть в избранном
 @app.post("/movies/favorites/{kinopoisk_id}", tags=["films"], dependencies=[Depends(JWTBearer())])
 async def add_film_to_favorites(kinopoisk_id: int, token=Depends(JWTBearer())) -> MessageError:
     user: CurrentUser = await get_current_user(token)
     film: Film = await get_film_on_id(kinopoisk_id)
     try:
         await async_insert_film(film['kinopoiskId'], film['nameRu'])
-    except:
-        pass
-    await async_insert_favorites(film['kinopoiskId'], user.id)
-    return {
-        "message": f"Film with id = {kinopoisk_id} is added  to {user.name}'s favorites",
-        "error": "0"
-    }
+    finally:
+        await async_insert_favorites(film['kinopoiskId'], user.id)
+        result = MessageError(
+            message=f"Film with id = {kinopoisk_id} is added  to {user.name}'s favorites",
+            error="0"
+        )
+    return result
 
 
 @app.delete("/movies/favorites/{kinopoisk_id}", tags=["films"], dependencies=[Depends(JWTBearer())])
-async def delete_film_to_favorites(kinopoisk_id: int, token=Depends(JWTBearer())) -> MessageError:
+async def delete_film_from_favorites(kinopoisk_id: int, token=Depends(JWTBearer())) -> MessageError:
     user: CurrentUser = await get_current_user(token)
-
-    return {
-        "message": f"Film with id = {kinopoisk_id} is added  to {user.name}'s favorites",
-        "error": "0"
-    }
+    await async_delete_favorites(kinopoisk_id, user.id)
+    result = MessageError(
+        message=f"Film with id = {kinopoisk_id} is deleted to {user.name}'s favorites",
+        error="0"
+    )
+    return result

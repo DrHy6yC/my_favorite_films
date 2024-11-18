@@ -7,6 +7,14 @@ class MessageError(BaseModel):
     message: str
     error: str
 
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "message": f"Film with id = 302 is added to user's favorites",
+                "error": "0"
+            }
+        }
+
 
 class Token(BaseModel):
     access_token: str
@@ -109,42 +117,15 @@ class Film(BaseModel):
 
 class FilmSearch(BaseModel):
     filmId: int
-    nameRu: str
-    nameEn: str
-    type: str
-    year: str
-    description: str
-    filmLength: str
+    nameRu: Optional[str] = None
+    nameEn: Optional[str] = None
+    type: Optional[str] = None
+    year: Optional[str] = None
+    description: Optional[str] = None
+    filmLength: Optional[str] = None
     countries: List[Country]
     genres: List[Genre]
-    rating: str
-    ratingVoteCount: int
-    posterUrl: str
-    posterUrlPreview: str
-
-
-[
-  {
-    "filmId": 0,
-    "nameRu": "string",
-    "nameEn": "string",
-    "type": "string",
-    "year": "string",
-    "description": "string",
-    "filmLength": "string",
-    "countries": [
-      {
-        "country": "string"
-      }
-    ],
-    "genres": [
-      {
-        "genre": "string"
-      }
-    ],
-    "rating": "string",
-    "ratingVoteCount": 0,
-    "posterUrl": "string",
-    "posterUrlPreview": "string"
-  }
-]
+    rating: Optional[str] = None
+    ratingVoteCount: Optional[int] = None
+    posterUrl: Optional[str] = None
+    posterUrlPreview: Optional[str] = None
