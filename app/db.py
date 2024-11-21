@@ -45,14 +45,6 @@ async def create_tables():
         await conn.run_sync(Base.metadata.create_all)
 
 
-# async def async_select_users() -> [UsersORM]:
-#     async with session_maker() as session_sql:
-#         query = select(UsersORM)
-#         result_execute = await session_sql.execute(query)
-#         result = result_execute.scalars().all()
-#         return result
-
-
 async def async_is_user_in_table(user_name: str, user_password: str) -> bool:
     async with session_maker() as session_sql:
         try:
@@ -60,7 +52,6 @@ async def async_is_user_in_table(user_name: str, user_password: str) -> bool:
             result_execute = await session_sql.execute(query)
             user = result_execute.scalars().one()
             return check_password(user.hash_password, user_password)
-
         except:
             return False
 

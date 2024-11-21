@@ -1,6 +1,6 @@
 import aiohttp
 
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, status, Response
 
 from app.auth.auth_bearer import JWTBearer
 from app.auth.auth_handler import sign_jwt, decode_jwt
@@ -13,31 +13,73 @@ app = FastAPI()
 
 
 #TODO добавить статус коды, обработка ошибок
-@app.get("/create_all_tables", tags=["create_all_tables"])
-async def create_all_tables() -> dict:
-    await create_tables()
-    return {
-        "message": "All tables have been created",
-        "error": "0"
+@app.get(
+    "/create_all_tables",
+    tags=["create_all_tables"],
+    responses={
+        201: {"model": MessageError},
+        500: {"model": MessageError}
     }
+)
+async def create_all_tables(response: Response) -> MessageError:
+    try:
+        await create_tables()
+        status_code = status.HTTP_201_CREATED
+        message = "All tables have been created"
+        error = "0"
+    except OSError as oserr:
+        status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+        print(oserr)
+        message = "DB Error"
+        error = "-1"
+    except Exception as err:
+        status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+        print(err)
+        message = "Server Error"
+        error = "-2"
+    response.status_code = status_code
+    result = MessageError(
+        message=message,
+        error=error
+    )
+    return result
 
 
-@app.post("/register", tags=["user"])
-async def create_user(user: UserSchema) -> UserToken:
+@app.post(
+    "/register",
+    tags=["user"],
+    responses={
+        201: {"model": UserToken}
+    }
+)
+#TODO Дописать статус коды когда БД не доступна, когда неправильный запрос
+async def create_user(response: Response, user: UserSchema) -> UserToken|MessageError:
     await async_insert_user(user.name, user.password)
     token = sign_jwt(user.name)
+    status_code = status.HTTP_201_CREATED
+    response.status_code = status_code
     return token
 
 
-@app.post("/login", tags=["user"])
-async def user_login(user: UserSchema) -> UserToken:
+@app.post(
+    "/login",
+    tags=["user"],
+    responses={
+        200: {"model": UserToken},
+        401: {"model": UserToken}
+    }
+)
+async def user_login(response: Response, user: UserSchema) -> UserToken:
     if await async_is_user_in_table(user.name, user.password):
         token = sign_jwt(user.name)
+        status_code = status.HTTP_200_OK
     else:
         # TODO сделать ошибку авторизации со статус кодом
         token = UserToken(
             access_token="Wrong login details!"
         )
+        status_code = status.HTTP_401_UNAUTHORIZED
+    response.status_code = status_code
     return token
 
 

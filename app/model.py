@@ -10,7 +10,7 @@ class MessageError(BaseModel):
     class Config:
         json_schema_extra = {
             "example": {
-                "message": f"Film with id = 302 is added to user's favorites",
+                "message": f"Message or Error",
                 "error": "0"
             }
         }
