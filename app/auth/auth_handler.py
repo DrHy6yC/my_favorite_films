@@ -10,6 +10,7 @@ JWT_SECRET: str = JWT_ALGORITHM
 JWT_ALGORITHM: str = JWT_ALGORITHM
 
 
+#TODO поправить возвращаемые данные
 def token_response(token: str) -> UserToken:
     return {
         "access_token": token
