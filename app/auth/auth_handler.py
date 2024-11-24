@@ -16,6 +16,7 @@ def token_response(token: str) -> UserToken:
     }
 
 
+#TODO добавить переменную срока жизни токена
 def sign_jwt(user_name: str) -> UserToken:
     payload = {
         "user_name": user_name,
