@@ -129,3 +129,9 @@ class FilmSearch(BaseModel):
     ratingVoteCount: Optional[int] = None
     posterUrl: Optional[str] = None
     posterUrlPreview: Optional[str] = None
+
+
+class FilmFavorites(BaseModel):
+    id: int
+    kinopoisk_id: int
+    name: str
