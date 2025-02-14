@@ -1,6 +1,6 @@
 import aiohttp
 
-from fastapi import FastAPI, Depends, status, Response
+from fastapi import FastAPI, Depends, status, Response, HTTPException
 
 from app.auth.auth_bearer import JWTBearer
 from app.auth.auth_handler import sign_jwt, decode_jwt
@@ -114,7 +114,7 @@ async def get_film_on_name(
         query: str
 ) -> list[FilmSearch]:
     async with aiohttp.ClientSession(headers=HEADERS) as session:
-        async with session.get(f"{KINOPOISK_URL}/{SEARCH_BY_KEYWORD}={query}") as r:
+        async with session.get(f"{KINOPOISK_URL}/{SEARCH_BY_KEYWORD}={query}", ssl=False) as r:
             json_body = await r.json()
             films = json_body["films"]
     return films
@@ -129,7 +129,7 @@ async def get_film_on_id(
         kinopoisk_id: int
 ) -> Film:
     async with aiohttp.ClientSession(headers=HEADERS) as session:
-        async with session.get(f"{KINOPOISK_URL}/{FILMS}/{kinopoisk_id}") as r:
+        async with session.get(f"{KINOPOISK_URL}/{FILMS}/{kinopoisk_id}", ssl=False) as r:
             json_body = await r.json()
     return json_body
 
