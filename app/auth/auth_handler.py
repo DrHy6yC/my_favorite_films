@@ -2,12 +2,8 @@ import time
 import jwt
 from typing import Dict
 
-from app.config import JWT_ALGORITHM
+from app.config import JWT_ALGORITHM, JWT_SECRET, TOKEN_LIFETIME
 from app.model import UserToken
-
-
-JWT_SECRET: str = JWT_ALGORITHM
-JWT_ALGORITHM: str = JWT_ALGORITHM
 
 
 #TODO поправить возвращаемые данные
@@ -17,12 +13,13 @@ def token_response(token: str) -> UserToken:
     }
 
 
-#TODO добавить переменную срока жизни токена
 def sign_jwt(user_name: str) -> UserToken:
+    expires = time.time() + float(TOKEN_LIFETIME)
     payload = {
         "user_name": user_name,
-        "expires": time.time() + 600
+        "expires": expires
     }
+    print(payload)
     token = jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
 
     return token_response(token)
