@@ -52,7 +52,8 @@ async def create_all_tables(
     "/register",
     tags=["user"],
     responses={
-        201: {"model": UserToken}
+        201: {"model": UserToken},
+        500: {"model": MessageError}
     }
 )
 # TODO Дописать статус коды когда БД не доступна, когда неправильный запрос
@@ -60,11 +61,18 @@ async def create_user(
         response: Response,
         user: UserSchema
 ) -> UserToken | MessageError:
-    await async_insert_user(user.name, user.password)
-    token = sign_jwt(user.name)
-    status_code = status.HTTP_201_CREATED
-    response.status_code = status_code
-    return token
+    try:
+        await async_insert_user(user.name, user.password)
+        token = sign_jwt(user.name)
+        response.status_code = status.HTTP_201_CREATED
+        return token
+    except Exception as error:
+        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+        print(error)
+        return MessageError(
+        message="error",
+        error="1"
+        )
 
 
 @app.post(

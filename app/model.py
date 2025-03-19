@@ -16,12 +16,6 @@ class MessageError(BaseModel):
         }
 
 
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-    access_token_expires: str
-
-
 class UserToken(BaseModel):
     access_token: str
 
