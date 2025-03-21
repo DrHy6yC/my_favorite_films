@@ -13,10 +13,25 @@ from app.model import UserSchema, CurrentUser, UserToken, Film, FilmSearch, Mess
 app = FastAPI()
 
 
+@app.get(
+    path="/",
+    tags=["Greeting"],
+    responses={
+        200: {"model": MessageError}
+    }
+)
+async def api_greeting() -> MessageError:
+    result = MessageError(
+        message="Приветствуем на апи по поиску фильмов в кинопоиске!",
+        error="0"
+    )
+    return result
+
+
 # TODO добавить статус коды, обработка ошибок
 @app.get(
-    "/create_all_tables",
-    tags=["create_all_tables"],
+    path="/create_all_tables",
+    tags=["Create all tables"],
     responses={
         201: {"model": MessageError},
         500: {"model": MessageError}
@@ -49,7 +64,7 @@ async def create_all_tables(
 
 
 @app.post(
-    "/register",
+    path="/register",
     tags=["user"],
     responses={
         201: {"model": UserToken},
@@ -70,13 +85,13 @@ async def create_user(
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         print(error)
         return MessageError(
-        message="error",
-        error="1"
+            message="error",
+            error="1"
         )
 
 
 @app.post(
-    "/login",
+    path="/login",
     tags=["user"],
     responses={
         200: {"model": UserToken},
@@ -101,7 +116,7 @@ async def user_login(
 
 
 @app.get(
-    "/profile",
+    path="/profile",
     tags=["user"],
     dependencies=[Depends(JWTBearer())]
 )
@@ -114,7 +129,7 @@ async def get_current_user(
 
 
 @app.get(
-    "/movies/search",
+    path="/movies/search",
     tags=["films"],
     dependencies=[Depends(JWTBearer())]
 )
@@ -129,7 +144,7 @@ async def get_film_on_name(
 
 
 @app.get(
-    "/movies/{kinopoisk_id}",
+    path="/movies/{kinopoisk_id}",
     tags=["films"],
     dependencies=[Depends(JWTBearer())]
 )
@@ -144,7 +159,7 @@ async def get_film_on_id(
 
 # TODO Сделать проверку если фильм уже есть в избранном
 @app.post(
-    "/movies/favorites/{kinopoisk_id}",
+    path="/movies/favorites/{kinopoisk_id}",
     tags=["films"],
     dependencies=[Depends(JWTBearer())]
 )
@@ -166,7 +181,7 @@ async def add_film_to_favorites(
 
 
 @app.delete(
-    "/movies/favorites/{kinopoisk_id}",
+    path="/movies/favorites/{kinopoisk_id}",
     tags=["films"],
     dependencies=[Depends(JWTBearer())]
 )
@@ -184,7 +199,7 @@ async def delete_film_from_favorites(
 
 
 @app.get(
-    "/movies/favorites/",
+    path="/movies/favorites/",
     tags=["films"],
     dependencies=[Depends(JWTBearer())]
 )
